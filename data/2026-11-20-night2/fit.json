@@ -1,0 +1,241 @@
+{
+ "run": "2026-11-20-night2",
+ "spec": {
+  "prior": "atlas-2026-10-29",
+  "charge": "end",
+  "tolerance": 0.03,
+  "free": [
+   {
+    "name": "fable.output",
+    "model": "claude-fable-5-2",
+    "types": [
+     "output"
+    ],
+    "meters": [
+     "all_models",
+     "fable"
+    ]
+   },
+   {
+    "name": "fable.cache_read",
+    "model": "claude-fable-5-2",
+    "types": [
+     "cache_read"
+    ],
+    "meters": [
+     "all_models",
+     "fable"
+    ]
+   },
+   {
+    "name": "fable.cache_write_5m",
+    "model": "claude-fable-5-2",
+    "types": [
+     "cache_write_5m",
+     "input"
+    ],
+    "meters": [
+     "all_models",
+     "fable"
+    ]
+   },
+   {
+    "name": "fable.cache_write_1h",
+    "model": "claude-fable-5-2",
+    "types": [
+     "cache_write_1h"
+    ],
+    "meters": [
+     "all_models",
+     "fable"
+    ]
+   },
+   {
+    "name": "opus.cache_read",
+    "model": "claude-opus-5-5",
+    "types": [
+     "cache_read"
+    ],
+    "meters": [
+     "all_models"
+    ]
+   }
+  ],
+  "fixed": [
+   {
+    "model": "claude-opus-5-5",
+    "types": [
+     "output",
+     "cache_write_5m",
+     "cache_write_1h",
+     "input"
+    ],
+    "meters": [
+     "all_models"
+    ],
+    "factor": 1.22,
+    "price_as": {
+     "input": "cache_write_5m"
+    },
+    "note": "night 1's Opus factor"
+   },
+   {
+    "model": "claude-haiku-5-5",
+    "types": [
+     "output",
+     "cache_write_5m",
+     "cache_write_1h",
+     "cache_read",
+     "input"
+    ],
+    "meters": [
+     "all_models"
+    ],
+    "factor": 1.0,
+    "price_as": {
+     "input": "cache_write_5m"
+    },
+    "note": "the original analysis counted Haiku's few uncached input tokens with its 5-minute writes"
+   }
+  ]
+ },
+ "n_calls": 755,
+ "n_readings": {
+  "cli": 999,
+  "usage_endpoint": 24
+ },
+ "solves": {
+  "round": {
+   "feasible": true,
+   "readings": 1023,
+   "margin": -0.009181351962027406,
+   "point": {
+    "offset.all_models": 63.37704638568175,
+    "offset.fable": 51.75108953487461,
+    "all_models/fable.output": 3.296613360515786,
+    "all_models/fable.cache_read": 0.02506646565503414,
+    "all_models/fable.cache_write_5m": 1.0858893106871952,
+    "all_models/fable.cache_write_1h": 0.8243968749741777,
+    "all_models/opus.cache_read": 0.010554483594133173,
+    "fable/fable.output": 7.033705112896351,
+    "fable/fable.cache_read": 0.04068229630487051,
+    "fable/fable.cache_write_5m": 1.643211056855693,
+    "fable/fable.cache_write_1h": 1.657402986273369
+   },
+   "range": {
+    "offset.all_models": [
+     63.22230055211161,
+     63.42519388664352
+    ],
+    "offset.fable": [
+     51.68537521105524,
+     51.774334677499944
+    ],
+    "all_models/fable.output": [
+     3.142556551092954,
+     3.7350251575620437
+    ],
+    "all_models/fable.cache_read": [
+     0.015624937236395332,
+     0.031434543732289995
+    ],
+    "all_models/fable.cache_write_5m": [
+     0.9693765776280897,
+     1.1610858297624895
+    ],
+    "all_models/fable.cache_write_1h": [
+     0.7111884151138226,
+     1.2171309531257248
+    ],
+    "all_models/opus.cache_read": [
+     0.007154169197157455,
+     0.01136822952892872
+    ],
+    "fable/fable.output": [
+     6.937823222946865,
+     7.15703155506206
+    ],
+    "fable/fable.cache_read": [
+     0.02097415562420017,
+     0.04289886909949404
+    ],
+    "fable/fable.cache_write_5m": [
+     1.6083023528573006,
+     1.9737109674088327
+    ],
+    "fable/fable.cache_write_1h": [
+     1.147793322071806,
+     2.2499862976590888
+    ]
+   }
+  },
+  "trunc": {
+   "feasible": false,
+   "readings": 1023
+  },
+  "none": {
+   "feasible": true,
+   "readings": 999,
+   "margin": -0.009181351962027406,
+   "point": {
+    "offset.all_models": 63.37704638568175,
+    "offset.fable": 51.75108953487461,
+    "all_models/fable.output": 3.296613360515786,
+    "all_models/fable.cache_read": 0.02506646565503414,
+    "all_models/fable.cache_write_5m": 1.0858893106871952,
+    "all_models/fable.cache_write_1h": 0.8243968749741777,
+    "all_models/opus.cache_read": 0.010554483594133173,
+    "fable/fable.output": 7.033705112896351,
+    "fable/fable.cache_read": 0.04068229630487051,
+    "fable/fable.cache_write_5m": 1.643211056855693,
+    "fable/fable.cache_write_1h": 1.657402986273369
+   },
+   "range": {
+    "offset.all_models": [
+     63.22230055211161,
+     63.42519388664352
+    ],
+    "offset.fable": [
+     51.68537521105524,
+     51.774334677499944
+    ],
+    "all_models/fable.output": [
+     3.142556551092954,
+     3.7350251575620437
+    ],
+    "all_models/fable.cache_read": [
+     0.015624937236395332,
+     0.031434543732289995
+    ],
+    "all_models/fable.cache_write_5m": [
+     0.9693765776280897,
+     1.1610858297624895
+    ],
+    "all_models/fable.cache_write_1h": [
+     0.7111884151138226,
+     1.2171309531257248
+    ],
+    "all_models/opus.cache_read": [
+     0.007154169197157455,
+     0.01136822952892872
+    ],
+    "fable/fable.output": [
+     6.937823222946865,
+     7.15703155506206
+    ],
+    "fable/fable.cache_read": [
+     0.02097415562420017,
+     0.04289886909949404
+    ],
+    "fable/fable.cache_write_5m": [
+     1.6083023528573006,
+     1.9737109674088327
+    ],
+    "fable/fable.cache_write_1h": [
+     1.147793322071806,
+     2.2499862976590888
+    ]
+   }
+  }
+ }
+}

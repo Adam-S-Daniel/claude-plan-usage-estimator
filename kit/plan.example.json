@@ -1,0 +1,49 @@
+[
+ {
+  "name": "fable-out",
+  "model": "claude-fable-5-2",
+  "kind": "out",
+  "workers": 6,
+  "ticks": 2,
+  "usd": 30,
+  "minutes": 40
+ },
+ {
+  "name": "fable-cr",
+  "model": "claude-fable-5-2",
+  "kind": "cr",
+  "workers": 8,
+  "ticks": 2,
+  "usd": 30,
+  "minutes": 25
+ },
+ {
+  "name": "fable-cw5",
+  "model": "claude-fable-5-2",
+  "kind": "cw5",
+  "workers": 1,
+  "ticks": 2,
+  "usd": 40,
+  "minutes": 25,
+  "gap_s": 30
+ },
+ {
+  "name": "fable-cw1h",
+  "model": "claude-fable-5-2",
+  "kind": "cw1h",
+  "workers": 1,
+  "ticks": 1,
+  "usd": 30,
+  "minutes": 20,
+  "gap_s": 30
+ },
+ {
+  "name": "opus-cr",
+  "model": "claude-opus-5-5",
+  "kind": "cr",
+  "workers": 8,
+  "ticks": 1,
+  "usd": 45,
+  "minutes": 20
+ }
+]

@@ -1,0 +1,27 @@
+name: CI
+
+# `test` is the one required check, so the trigger carries no `paths:` filter
+# (a required check that never reports blocks the merge). The whole repo is
+# salient: tables, the function, the kit and the committed runs are all tested.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: pip install numpy==2.5.3 scipy==1.18.1 pytest==9.1.1
+      - name: Run tests
+        run: python -m pytest tests -q
