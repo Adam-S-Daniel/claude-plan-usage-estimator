@@ -1,0 +1,20 @@
+# Version updates wait out a 7-day cooldown, the fleet's cooling-off period
+# for third-party releases; security updates bypass it. The owner's own
+# actions skip it. github-actions supports only `default-days`; pip also
+# takes `semver-major-days`.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 7
+      exclude: ["Adam-S-Daniel/*", "jodidaniel/*"]
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
