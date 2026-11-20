@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "claude-plan-usage-estimator"
+version = "0.1.0"
+description = "Predict how much of a Claude subscription's weekly allowance a piece of work used, from its token counts by type."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+dependencies = []
+
+[project.optional-dependencies]
+fit = ["numpy", "scipy"]
+test = ["pytest"]
+
+[tool.setuptools]
+packages = ["usage_weights"]
+
+[tool.setuptools.package-data]
+usage_weights = ["data/weights/*.json", "data/prices/*.json"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

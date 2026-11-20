@@ -1,0 +1,18 @@
+{
+  "prior": "atlas-2026-10-29",
+  "charge": "end",
+  "tolerance": 0.03,
+  "free": [
+    {"name": "fable.output", "model": "claude-fable-5-2", "types": ["output"], "meters": ["all_models", "fable"]},
+    {"name": "fable.cache_read", "model": "claude-fable-5-2", "types": ["cache_read"], "meters": ["all_models", "fable"]},
+    {"name": "fable.cache_write_5m", "model": "claude-fable-5-2", "types": ["cache_write_5m", "input"], "meters": ["all_models", "fable"]},
+    {"name": "fable.cache_write_1h", "model": "claude-fable-5-2", "types": ["cache_write_1h"], "meters": ["all_models", "fable"]},
+    {"name": "opus.cache_read", "model": "claude-opus-5-5", "types": ["cache_read"], "meters": ["all_models"]}
+  ],
+  "fixed": [
+    {"model": "claude-opus-5-5", "types": ["output", "cache_write_5m", "cache_write_1h", "input"], "meters": ["all_models"], "factor": 1.22,
+     "price_as": {"input": "cache_write_5m"}, "note": "night 1's Opus factor"},
+    {"model": "claude-haiku-5-5", "types": ["output", "cache_write_5m", "cache_write_1h", "cache_read", "input"], "meters": ["all_models"], "factor": 1.0,
+     "price_as": {"input": "cache_write_5m"}, "note": "the original analysis counted Haiku's few uncached input tokens with its 5-minute writes"}
+  ]
+}

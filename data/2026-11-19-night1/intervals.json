@@ -1,0 +1,270 @@
+{
+ "prior": "atlas-2026-10-29",
+ "ticks": [
+  {
+   "value": 38,
+   "at": "2026-11-19T08:04:28.300Z",
+   "previous_reading_at": "2026-11-19T08:04:14.614Z"
+  },
+  {
+   "value": 39,
+   "at": "2026-11-19T08:15:07.043Z",
+   "previous_reading_at": "2026-11-19T08:15:04.129Z"
+  },
+  {
+   "value": 40,
+   "at": "2026-11-19T08:26:06.113Z",
+   "previous_reading_at": "2026-11-19T08:25:54.774Z"
+  },
+  {
+   "value": 41,
+   "at": "2026-11-19T08:38:29.524Z",
+   "previous_reading_at": "2026-11-19T08:38:26.847Z"
+  },
+  {
+   "value": 42,
+   "at": "2026-11-19T08:49:47.816Z",
+   "previous_reading_at": "2026-11-19T08:49:45.685Z"
+  }
+ ],
+ "intervals": [
+  {
+   "from": 38,
+   "to": 39,
+   "start": "2026-11-19T08:04:28.300Z",
+   "end": "2026-11-19T08:15:07.043Z",
+   "mode": "end",
+   "prior_points": 0.8438536957219253,
+   "factor": 1.1850395454445335,
+   "api_usd": 17.587291200000006,
+   "prior_points_by_model": {
+    "claude-opus-5-5": 0.8438536957219254
+   },
+   "prior_points_by_type": {
+    "input": 0.000255333333333333,
+    "output": 0.2577621212121213,
+    "cache_read": 0.06432124117647066,
+    "cache_write_5m": 0.521515,
+    "cache_write_1h": 0.0
+   },
+   "tokens": {
+    "claude-opus-5-5": {
+     "input": 766.0,
+     "output": 170123.0,
+     "cache_read": 10934611.0,
+     "cache_write_5m": 2398969.0
+    }
+   }
+  },
+  {
+   "from": 38,
+   "to": 39,
+   "start": "2026-11-19T08:04:28.300Z",
+   "end": "2026-11-19T08:15:07.043Z",
+   "mode": "linear",
+   "prior_points": 0.8209210097261088,
+   "factor": 1.2181439969889902,
+   "api_usd": 17.154086563384208,
+   "prior_points_by_model": {
+    "claude-opus-5-5": 0.8209210097261088
+   },
+   "prior_points_by_type": {
+    "input": 0.00024811849826864496,
+    "output": 0.24568309152174136,
+    "cache_read": 0.06212063091615745,
+    "cache_write_5m": 0.5128691687899414,
+    "cache_write_1h": 0.0
+   },
+   "tokens": {
+    "claude-opus-5-5": {
+     "input": 744.3554948059359,
+     "output": 162150.84040434926,
+     "cache_read": 10560507.255746754,
+     "cache_write_5m": 2359198.1764337304
+    }
+   }
+  },
+  {
+   "from": 39,
+   "to": 40,
+   "start": "2026-11-19T08:15:07.043Z",
+   "end": "2026-11-19T08:26:06.113Z",
+   "mode": "end",
+   "prior_points": 0.8065677285514997,
+   "factor": 1.2398214862822268,
+   "api_usd": 16.860534000000005,
+   "prior_points_by_model": {
+    "claude-opus-5-5": 0.8065677285514993
+   },
+   "prior_points_by_type": {
+    "input": 0.00024399999999999972,
+    "output": 0.24072272727272734,
+    "cache_read": 0.06102208823529421,
+    "cache_write_5m": 0.5045789130434781,
+    "cache_write_1h": 0.0
+   },
+   "tokens": {
+    "claude-opus-5-5": {
+     "input": 732.0,
+     "output": 158877.0,
+     "cache_read": 10373755.0,
+     "cache_write_5m": 2321063.0
+    }
+   }
+  },
+  {
+   "from": 39,
+   "to": 40,
+   "start": "2026-11-19T08:15:07.043Z",
+   "end": "2026-11-19T08:26:06.113Z",
+   "mode": "linear",
+   "prior_points": 0.8214062056062437,
+   "factor": 1.2174244523292153,
+   "api_usd": 17.137509528650227,
+   "prior_points_by_model": {
+    "claude-opus-5-5": 0.8214062056062438
+   },
+   "prior_points_by_type": {
+    "input": 0.0002485469495462022,
+    "output": 0.2490280226047329,
+    "cache_read": 0.06257958524345535,
+    "cache_write_5m": 0.5095500508085092,
+    "cache_write_1h": 0.0
+   },
+   "tokens": {
+    "claude-opus-5-5": {
+     "input": 745.6408486386075,
+     "output": 164358.49491912368,
+     "cache_read": 10638529.491387393,
+     "cache_write_5m": 2343930.233719144
+    }
+   }
+  },
+  {
+   "from": 40,
+   "to": 41,
+   "start": "2026-11-19T08:26:06.113Z",
+   "end": "2026-11-19T08:38:29.524Z",
+   "mode": "end",
+   "prior_points": 0.7175404754179818,
+   "factor": 1.3936496048079794,
+   "api_usd": 13.23300529999999,
+   "prior_points_by_model": {
+    "claude-opus-5-5": 0.11922228777803613,
+    "claude-sonnet-5-5": 0.5983181876399476
+   },
+   "prior_points_by_type": {
+    "input": 0.00021853333333333395,
+    "output": 0.17552424242424194,
+    "cache_read": 0.05098038458417864,
+    "cache_write_5m": 0.49081731507622794,
+    "cache_write_1h": 0.0
+   },
+   "tokens": {
+    "claude-opus-5-5": {
+     "input": 100.0,
+     "output": 36547.0,
+     "cache_read": 1658338.0,
+     "cache_write_5m": 248675.0
+    },
+    "claude-sonnet-5-5": {
+     "input": 926.0,
+     "output": 132165.0,
+     "cache_write_5m": 3363033.0,
+     "cache_read": 11955382.0
+    }
+   }
+  },
+  {
+   "from": 40,
+   "to": 41,
+   "start": "2026-11-19T08:26:06.113Z",
+   "end": "2026-11-19T08:38:29.524Z",
+   "mode": "linear",
+   "prior_points": 0.7019244927316224,
+   "factor": 1.4246546606578459,
+   "api_usd": 12.926821975782975,
+   "prior_points_by_model": {
+    "claude-opus-5-5": 0.09665007933263371,
+    "claude-sonnet-5-5": 0.6052744133989905
+   },
+   "prior_points_by_type": {
+    "input": 0.00021406371503415557,
+    "output": 0.1659430454682271,
+    "cache_read": 0.049406497198692695,
+    "cache_write_5m": 0.48636088634966845,
+    "cache_write_1h": 0.0
+   },
+   "tokens": {
+    "claude-opus-5-5": {
+     "input": 79.98912664092664,
+     "output": 28890.385036722437,
+     "cache_read": 1296059.850385693,
+     "cache_write_5m": 208040.63111696695
+    },
+    "claude-sonnet-5-5": {
+     "input": 937.0033641025641,
+     "output": 134386.7082871795,
+     "cache_write_5m": 3396736.8988923077,
+     "cache_read": 12116958.560492309
+    }
+   }
+  },
+  {
+   "from": 41,
+   "to": 42,
+   "start": "2026-11-19T08:38:29.524Z",
+   "end": "2026-11-19T08:49:47.816Z",
+   "mode": "end",
+   "prior_points": 0.6792089199731302,
+   "factor": 1.4723010410987543,
+   "api_usd": 12.386874899999992,
+   "prior_points_by_model": {
+    "claude-sonnet-5-5": 0.6792089199731322
+   },
+   "prior_points_by_type": {
+    "input": 0.00021200000000000052,
+    "output": 0.1393872727272727,
+    "cache_read": 0.04759068620689666,
+    "cache_write_5m": 0.4920189610389608,
+    "cache_write_1h": 0.0
+   },
+   "tokens": {
+    "claude-sonnet-5-5": {
+     "input": 1060.0,
+     "output": 153326.0,
+     "cache_read": 13801299.0,
+     "cache_write_5m": 3788546.0
+    }
+   }
+  },
+  {
+   "from": 41,
+   "to": 42,
+   "start": "2026-11-19T08:38:29.524Z",
+   "end": "2026-11-19T08:49:47.816Z",
+   "mode": "linear",
+   "prior_points": 0.6772237991244351,
+   "factor": 1.4766167421949343,
+   "api_usd": 12.353321533448199,
+   "prior_points_by_model": {
+    "claude-sonnet-5-5": 0.6772237991244369
+   },
+   "prior_points_by_type": {
+    "input": 0.00021140854974359028,
+    "output": 0.138641267020979,
+    "cache_read": 0.04743685972420877,
+    "cache_write_5m": 0.49093426382950367,
+    "cache_write_1h": 0.0
+   },
+   "tokens": {
+    "claude-sonnet-5-5": {
+     "input": 1057.0427487179486,
+     "output": 152505.39372307694,
+     "cache_read": 13756689.320020512,
+     "cache_write_5m": 3780193.8314871797
+    }
+   }
+  }
+ ]
+}
