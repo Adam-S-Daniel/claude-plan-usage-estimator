@@ -1,5 +1,5 @@
 # Test and fit dependencies, pinned exactly so CI is reproducible and
 # Dependabot has a file to bump. The package itself needs none of these.
-numpy==2.5.3
+numpy==2.5.4
 scipy==1.18.1
 pytest==9.1.1
