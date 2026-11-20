@@ -22,6 +22,6 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install test dependencies
-        run: pip install numpy==2.5.3 scipy==1.18.1 pytest==9.1.1
+        run: pip install -r requirements-dev.txt
       - name: Run tests
         run: python -m pytest tests -q
