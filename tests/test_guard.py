@@ -104,6 +104,22 @@ def test_short_interval_is_contaminated():
     assert out[2]["evidence"][0]["kind"] == "short_interval"
 
 
+def test_short_interval_is_judged_within_its_own_block():
+    # Two blocks whose real factors differ about 2x: neighbors are only same-block intervals.
+    ivs = _ivs([2.0, 2.1, 1.9, 0.8, 0.85, 0.75])
+    for i, iv in enumerate(ivs):
+        iv["block"] = "cr" if i < 3 else "out"
+    assert [i["grade"] for i in guard.grade_intervals(ivs, [])] == ["clean"] * 6
+    ivs[4]["prior_points"] = 0.2  # really short inside the low block
+    out = guard.grade_intervals(ivs, [])
+    assert [i["grade"] for i in out] == ["clean"] * 4 + ["contaminated", "clean"]
+
+
+def test_block_of_strips_the_call_suffix():
+    assert [iv.block_of(t) for t in ("fable-cr-warm", "fable-cr-w3-12", "opus-cr", "probe")] == \
+        ["fable-cr", "fable-cr", None, None]
+
+
 def test_committed_runs_have_no_grade_and_stay_usable():
     night1 = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "2026-11-19-night1")
     assert guard.load(night1) is None

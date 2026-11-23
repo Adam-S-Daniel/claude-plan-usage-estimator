@@ -18,6 +18,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -59,6 +60,12 @@ def share(call, a, b, mode):
     return max(0.0, overlap) / span
 
 
+def block_of(tag):
+    """The block a call belongs to, or None: blocks.py tags calls `<block>-warm` or `<block>-w<worker>-<i>`."""
+    m = re.fullmatch(r"(.+)-(?:warm|w\d+-\d+)", tag)
+    return m.group(1) if m else None
+
+
 def compute(calls, readings, prior):
     rows = prior["meters"]["all_models"]["models"]
     ticks = find_ticks(readings)
@@ -67,7 +74,7 @@ def compute(calls, readings, prior):
         a, b = parse_iso(ticks[i]["at"]), parse_iso(ticks[i + 1]["at"])
         for mode in MODES:
             by_model, by_type, tokens = {}, dict.fromkeys(TOKEN_TYPES, 0.0), {}
-            usd = 0.0
+            usd, by_block = 0.0, {}
             for c in calls:
                 s = share(c, a, b, mode)
                 if not s:
@@ -82,6 +89,9 @@ def compute(calls, readings, prior):
                         continue
                     p = n / 1e6 * rows[key][t]["point"]
                     by_model[key] = by_model.get(key, 0.0) + p
+                    blk = block_of(c.get("tag", ""))
+                    if blk:
+                        by_block[blk] = by_block.get(blk, 0.0) + p
                     by_type[t] += p
                     tokens.setdefault(key, {}).setdefault(t, 0.0)
                     tokens[key][t] += n
@@ -93,6 +103,8 @@ def compute(calls, readings, prior):
                 "api_usd": usd, "prior_points_by_model": by_model,
                 "prior_points_by_type": by_type, "tokens": tokens,
             })
+            if by_block:  # a run of one unit of work (no blocks.py tags) has none
+                intervals[-1]["block"] = max(by_block, key=by_block.get)
     return ticks, intervals
 
 

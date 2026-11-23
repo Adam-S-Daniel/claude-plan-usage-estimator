@@ -157,10 +157,11 @@ def foreign_calls(root, start, end):
 
 def grade_intervals(intervals, evidence, ratio=SHORT_RATIO):
     """Copies of `intervals` with `evidence` and `grade`. Evidence belongs to the interval with
-    start < at <= end; the short-interval check runs per charge mode."""
+    start < at <= end; the short-interval check runs per (block, charge mode), because
+    blocks of one run have different real factors and must not be each other's neighbors."""
     out = [dict(iv, evidence=[]) for iv in intervals]
-    for mode in {iv["mode"] for iv in out}:
-        idx = [i for i, iv in enumerate(out) if iv["mode"] == mode]
+    for group in {(iv.get("block"), iv["mode"]) for iv in out}:
+        idx = [i for i, iv in enumerate(out) if (iv.get("block"), iv["mode"]) == group]
         for j in short_intervals([out[i]["prior_points"] for i in idx], ratio):
             iv = out[idx[j]]
             iv["evidence"].append({"kind": "short_interval", "at": iv["end"],
