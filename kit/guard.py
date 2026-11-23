@@ -30,6 +30,7 @@ CHECKLIST = (
 )
 USABLE = ("clean", "corrected", "schedule")  # grades the fit and the table builder may use
 SHORT_RATIO = 0.5  # an interval under this share of its neighbors' median kit tokens is flagged
+SETTLE_S = 10  # a call's tick shows up to 7 s after it ends (docs/method.md); the first reading in a window waits this long
 QUIET_HOUR_UTC = 8  # the committed runs started at 08:00 UTC
 
 
@@ -112,12 +113,12 @@ def rises(readings):
     return [(a[0], b[0], b[1]) for a, b in zip(rs, rs[1:]) if b[1] > a[1]]
 
 
-def quiet_ticks(readings, windows, kind):
+def quiet_ticks(readings, windows, kind, settle=dt.timedelta(seconds=SETTLE_S)):
     """Evidence for each rise whose two readings both lie inside one quiet window (start, end), a stretch
-    with no kit call but tiny probes. Both readings must be inside, so meter lag from a call before it
-    is not counted."""
+    with no kit call but tiny probes. Both readings must be inside, and the first at least SETTLE_S after
+    the window opens, so meter lag from a call just before it is not counted."""
     return [{"kind": kind, "at": iso(t1), "detail": f"meter rose to {v} with no kit call in the window"}
-            for t0, t1, v in rises(readings) if any(a <= t0 and t1 <= b for a, b in windows)]
+            for t0, t1, v in rises(readings) if any(a + settle <= t0 and t1 <= b for a, b in windows)]
 
 
 def unexpected_meter(readings, span):

@@ -171,3 +171,14 @@ def test_finish_guard_writes_record(tmp_path):
     doc = json.load(open(out / "guard.json"))
     assert doc["guard"]["idle_ticks"] == 1 and doc["guard"]["foreign_calls"] == 1
     assert sorted(e["kind"] for e in doc["evidence"]) == ["foreign_call", "idle_tick", "unexpected_meter"]
+
+
+def test_tick_from_the_block_before_the_window_is_not_an_idle_tick():
+    # The last call of a block ends as the idle window opens; its tick shows up to 7 s later (docs/method.md).
+    # The first idle probe, 2 s in, still reads the old value; the next probe, a minute on, reads the new one.
+    window = [(T0, T0 + dt.timedelta(minutes=10))]
+    lagged = [(T0 + dt.timedelta(seconds=2), 5), (T0 + dt.timedelta(seconds=62), 6)]
+    assert guard.quiet_ticks(lagged, window, "idle_tick") == []
+    # Once the first reading is past the settle period the same rise is outside use.
+    settled = [(T0 + dt.timedelta(seconds=guard.SETTLE_S), 5), (T0 + dt.timedelta(seconds=62), 6)]
+    assert len(guard.quiet_ticks(settled, window, "idle_tick")) == 1
