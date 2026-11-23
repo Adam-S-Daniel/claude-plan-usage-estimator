@@ -72,6 +72,38 @@ that interval; the factor is 1 divided by that sum, how many times the prior
 the workload moved the meter. Tokens are charged at call end or spread over
 each call's run; the two differ by 3% at most.
 
+## Guarding a run against outside use (`kit/guard.py`)
+
+Any call that is not the kit's moves the meter without the kit's tokens and
+biases a fitted weight low. `kit/blocks.py` guards in three stages.
+
+- **Before.** It looks for other `claude` processes and transcripts changed in
+  the last 10 minutes, and refuses to start until clear. `--allow-outside-use`
+  overrides, and the run is marked `unguarded`. It prints what it cannot see
+  (other devices, Claude chat, scheduled tasks and routines) and a suggested
+  quiet `--start`. `--idle-minutes N` probes an idle stretch first. A tick with
+  no kit tokens there is outside use; on small plans the stretch is short, so it
+  is advisory.
+- **During.** Each block does the same unit of work per call, so each whole
+  point costs about the same tokens; an interval with under half the median kit
+  prior points of the others is flagged. A meter that should not move (the
+  Fable meter in a block that uses no Fable model) is watched, and
+  `--gap-minutes N` leaves probed idle gaps between blocks. A tick between two
+  readings both inside an idle stretch is outside use or meter lag.
+- **After.** Transcripts stamped inside the run window are listed. The kit's own
+  calls run with `--no-session-persistence`, so they leave none.
+
+The driver writes `guard.json` (the `guard` record, for example
+`{"other_sessions_seen": 0, "idle_minutes": 240, "idle_ticks": 0, "unguarded": false}`,
+and the evidence rows `kind`, `at`, `detail`). `kit/intervals.py` reads it and
+puts `evidence` and a `grade` on every interval: `clean` (no evidence),
+`corrected` (every item has a recorded `correction`) or `contaminated`. Only
+`clean` and `corrected` intervals feed `kit/build_table.py`. `kit/fit.py`
+refuses a run whose `guard.json` has uncorrected evidence, because outside use
+shifts every later reading. Runs with no `guard.json`, the two committed ones,
+were kept clean by scheduling (quiet windows) and are graded by schedule only:
+their intervals carry no `grade` and count as usable.
+
 ## Run 1: a mixed workload
 
 79 Opus runs then 106 Sonnet runs of real agent tasks (742 calls, 12 fixtures,
