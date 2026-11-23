@@ -89,7 +89,9 @@ biases a fitted weight low. `kit/blocks.py` guards in three stages.
   prior points of the others is flagged. A meter that should not move (the
   Fable meter in a block that uses no Fable model) is watched, and
   `--gap-minutes N` leaves probed idle gaps between blocks. A tick between two
-  readings both inside an idle stretch is outside use or meter lag.
+  readings both inside an idle stretch is outside use or meter lag. The first
+  reading must be 10 seconds past the stretch's start, since the last call before
+  it can still tick for up to 7 seconds.
 - **After.** Transcripts stamped inside the run window are listed. The kit's own
   calls run with `--no-session-persistence`, so they leave none.
 
