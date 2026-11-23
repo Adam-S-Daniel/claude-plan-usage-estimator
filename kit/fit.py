@@ -22,6 +22,7 @@ import numpy as np
 from scipy.optimize import linprog
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from kit import guard  # noqa: E402
 from usage_weights import TOKEN_TYPES, load_table, reading_bounds  # noqa: E402
 from usage_weights.records import resolve_model  # noqa: E402
 
@@ -151,6 +152,11 @@ def fit_run(run_dir, spec=None):
     if spec is None:
         with open(os.path.join(run_dir, "fit-spec.json"), encoding="utf-8") as fh:
             spec = json.load(fh)
+    g = guard.load(run_dir)
+    bad = [e for e in (g or {}).get("evidence", []) if not e.get("correction")]
+    if bad:
+        raise ValueError(f"{len(bad)} uncorrected outside-use evidence item(s) in guard.json (first: {bad[0]['kind']} "
+                         f"at {bad[0]['at']}); a contaminated run is not fitted. Record a correction or trim the run")
     calls = read_jsonl(os.path.join(run_dir, "calls.jsonl"))
     readings = read_jsonl(os.path.join(run_dir, "readings.jsonl"))
     prior = load_table(spec["prior"])

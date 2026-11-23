@@ -15,6 +15,7 @@ import statistics
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from kit import guard  # noqa: E402
 from usage_weights import TOKEN_TYPES  # noqa: E402
 from usage_weights.table import load_table  # noqa: E402
 
@@ -95,7 +96,7 @@ def _joint(intervals, model, modes):
     out = []
     for iv in intervals:
         pm = {m for m, v in iv["prior_points_by_model"].items() if v > 0}
-        if iv["mode"] in modes and pm == {model} and iv["factor"] is not None:
+        if guard.usable(iv) and iv["mode"] in modes and pm == {model} and iv["factor"] is not None:
             out.append(iv)
     return out
 

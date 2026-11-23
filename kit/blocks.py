@@ -27,7 +27,15 @@ The first block gets one extra tick (the lead-in, which only fills the part of
 a point already used). See plan.example.json.
 
 Usage: blocks.py <plan.json> <out dir> [--probe-model ID] [--start ISO_UTC] [--test]
+                 [--idle-minutes N] [--gap-minutes N] [--allow-outside-use]
 --test sends one call of each block (two for cr: warm, then read) and stops.
+
+Guard (kit/guard.py): before the first call the driver refuses to start while other `claude`
+processes or recently changed transcripts are visible (--allow-outside-use overrides and marks
+the run unguarded), and prints what it cannot see. --idle-minutes probes an idle stretch first and
+--gap-minutes leaves probed idle gaps between blocks (both need --probe-model); a meter tick in
+one is outside use or lag. After the run it scans transcripts for calls the kit did not make and
+writes <out>/guard.json (the guard record plus per-item evidence) for intervals.py to grade from.
 
 A full run costs real allowance and API-priced dollars.
 """
@@ -41,7 +49,14 @@ import sys
 import threading
 import time
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from kit import guard  # noqa: E402
+
 PROBE_S = 10
+IDLE_PROBE_S = 60
+TRANSCRIPT_ROOT = os.path.join(os.path.expanduser('~'), '.claude', 'projects')
+RECENT_MINUTES = 10
+FABLE_KEY = 'seven_day_overage_included'
 PROBE_KINDS = ("cw5", "cw1h", "in")
 CACHE_VARS = ("FORCE_PROMPT_CACHING_5M", "ENABLE_PROMPT_CACHING_1H", "DISABLE_PROMPT_CACHING")
 
@@ -141,6 +156,7 @@ class Driver:
         self.lock = threading.Lock()
         self.state = dict(meter=-1, meter_fable=-1, spent=0.0)
         self.probe_on, self.stop_all = threading.Event(), threading.Event()
+        self.probe_s, self.quiet = PROBE_S, []  # quiet: (start, end) of each probed idle stretch
 
     def log(self, msg):
         line = f'{iso(now())} {msg}'
@@ -184,7 +200,7 @@ class Driver:
             if self.probe_on.is_set():
                 self.note(self.call(self.probe_model, 'cw5', 'Reply with only the word: ok', 'probe', self.PROBES),
                           count_cost=False)
-            self.stop_all.wait(PROBE_S)
+            self.stop_all.wait(self.probe_s)
 
     def run_block(self, b, first, hard_end):
         state, lock = self.state, self.lock
@@ -263,19 +279,73 @@ class Driver:
                          f"cr {u.get('cache_read_input_tokens')} cw {u.get('cache_creation')} "
                          f"${rec['cost_usd']} meters {rec['meters']}")
 
-    def run(self, start=None, hard_minutes=110):
+    def idle(self, minutes):
+        """Probe across an idle stretch; the stretch is recorded for the after-run tick check."""
+        t0 = now()
+        self.log(f'idle {minutes:g} min')
+        self.probe_s = IDLE_PROBE_S
+        self.probe_on.set()
+        self.stop_all.wait(minutes * 60)
+        self.probe_on.clear()
+        self.probe_s = PROBE_S
+        self.quiet.append((t0, now()))
+
+    def finish_guard(self, record, run_start, transcript_root=TRANSCRIPT_ROOT):
+        """Write guard.json: the guard record and the evidence found during and after the run."""
+        rows = [json.loads(line) for f in (self.CALLS, self.PROBES) if os.path.exists(f)
+                for line in open(f) if line.strip()]
+        evidence = guard.foreign_calls(transcript_root, run_start, now()) if os.path.isdir(transcript_root) else []
+        record['foreign_calls'] = len(evidence)
+        series = guard.meter_series(rows)
+        quiet = guard.quiet_ticks(series.get('seven_day', []), self.quiet, 'idle_tick')
+        evidence += quiet
+        record['idle_minutes'] = round(sum((b - a).total_seconds() for a, b in self.quiet) / 60, 1)
+        record['idle_ticks'] = len(quiet)
+        for b in self.plan:
+            if 'fable' in b['model'] or 'fable' in (self.probe_model or ''):
+                continue
+            mine = [r for r in rows if r['tag'].startswith(b['name'] + '-')]
+            if mine:
+                span = (min(guard.parse_iso(r['started']) for r in mine),
+                        max(guard.parse_iso(r['ended']) for r in mine))
+                evidence += guard.unexpected_meter(series.get(FABLE_KEY, []), span)
+        with open(os.path.join(self.out, 'guard.json'), 'w') as fh:
+            json.dump({'guard': record, 'evidence': sorted(evidence, key=lambda e: e['at'])}, fh, indent=1)
+            fh.write('\n')
+        self.log(f'guard: {len(evidence)} evidence item(s), unguarded={record["unguarded"]}')
+
+    def preflight(self, allow):
+        """Refuse to start while outside use is visible (unless allowed); return the guard record."""
+        ps = subprocess.run(['ps', '-eo', 'pid=,comm='], capture_output=True, text=True).stdout
+        seen = guard.recent_transcripts(TRANSCRIPT_ROOT, time.time(), RECENT_MINUTES) \
+            if os.path.isdir(TRANSCRIPT_ROOT) else []
+        print(guard.CHECKLIST)
+        print(f'Suggested quiet start: --start {guard.next_quiet_start(now())}')
+        try:
+            return guard.preflight(guard.parse_ps(ps), seen, allow)
+        except RuntimeError as e:
+            sys.exit(f'REFUSED: {e}')
+
+    def run(self, start=None, hard_minutes=110, allow_outside_use=False, idle_minutes=0, gap_minutes=0):
         if start:
             self.log(f'waiting for {start}')
             while now() < dt.datetime.fromisoformat(start.replace('Z', '+00:00')):
                 time.sleep(20)
+        record = self.preflight(allow_outside_use)
         hard_end = time.time() + hard_minutes * 60
+        run_start = now()
         threading.Thread(target=self.prober, daemon=True).start()
+        if idle_minutes:
+            self.idle(idle_minutes)
         for n, b in enumerate(self.plan):
             if time.time() >= hard_end:
                 self.log('hard time limit: skipping remaining blocks')
                 break
+            if n and gap_minutes:
+                self.idle(gap_minutes)
             self.run_block(b, n == 0, hard_end)
         self.stop_all.set()
+        self.finish_guard(record, run_start)
         self.log('driver done')
 
 
@@ -288,18 +358,24 @@ def main(argv=None):
     ap.add_argument('--probe-model', help='model for the meter probes; required when a block is cw5, cw1h or in')
     ap.add_argument('--words', type=int, default=int(os.environ.get('FILLER_WORDS', '100000')))
     ap.add_argument('--hard-minutes', type=float, default=110)
+    ap.add_argument('--idle-minutes', type=float, default=0, help='probe an idle stretch before the first block')
+    ap.add_argument('--gap-minutes', type=float, default=0, help='probed idle gap between blocks')
+    ap.add_argument('--allow-outside-use', action='store_true',
+                    help='start although other claude processes or recent transcripts are visible; marks the run unguarded')
     args = ap.parse_args(argv)
     with open(args.plan) as fh:
         plan = json.load(fh)
     if any(b['kind'] in PROBE_KINDS for b in plan) and not args.probe_model:
         ap.error('--probe-model is required when any block is cw5, cw1h or in')
+    if (args.idle_minutes or args.gap_minutes) and not args.probe_model:
+        ap.error('--probe-model is required for --idle-minutes and --gap-minutes')
     d = Driver(plan, args.out, args.words, args.probe_model)
     if not args.test and os.path.exists(d.CALLS) and os.path.getsize(d.CALLS):
         sys.exit(f'REFUSED: {d.CALLS} already has rows')
     if args.test:
         d.test()
         return
-    d.run(args.start, args.hard_minutes)
+    d.run(args.start, args.hard_minutes, args.allow_outside_use, args.idle_minutes, args.gap_minutes)
 
 
 if __name__ == '__main__':

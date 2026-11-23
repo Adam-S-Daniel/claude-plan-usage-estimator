@@ -8,6 +8,11 @@ consecutive ticks the meter moved exactly one point, so
 factor = 1 / (prior points of the tokens charged in the interval): how many
 times the prior the workload moved the meter. Tokens are charged at call end
 ("end") or spread evenly over each call's run ("linear").
+
+With a guard.json in the run folder (written by blocks.py) each interval also
+gets its evidence and a grade (clean, corrected, contaminated); see
+kit/guard.py. Without one the run is graded by schedule only and the
+intervals carry no grade.
 """
 import argparse
 import datetime as dt
@@ -16,6 +21,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from kit import guard  # noqa: E402
 from usage_weights import TOKEN_TYPES, load_table  # noqa: E402
 from usage_weights.records import resolve_model  # noqa: E402
 
@@ -100,13 +106,18 @@ def main(argv=None):
     readings = read_jsonl(os.path.join(args.run, "readings.jsonl"))
     ticks, intervals = compute(calls, readings, load_table(args.prior))
     out = args.out or os.path.join(args.run, "intervals.json")
+    doc = {"prior": args.prior, "ticks": ticks, "intervals": intervals}
+    g = guard.load(args.run)
+    if g is not None:
+        doc["guard"], doc["intervals"] = g["guard"], guard.grade_intervals(intervals, g["evidence"])
+        intervals = doc["intervals"]
     with open(out, "w", encoding="utf-8") as fh:
-        json.dump({"prior": args.prior, "ticks": ticks, "intervals": intervals}, fh, indent=1)
+        json.dump(doc, fh, indent=1)
         fh.write("\n")
     for iv in intervals:
         f = iv["factor"]
         print(f"{iv['from']}->{iv['to']} {iv['mode']:6} prior points {iv['prior_points']:.4f} "
-              f"factor {f if f is None else round(f, 4)}")
+              f"factor {f if f is None else round(f, 4)}" + (f" grade {iv['grade']}" if "grade" in iv else ""))
 
 
 if __name__ == "__main__":
