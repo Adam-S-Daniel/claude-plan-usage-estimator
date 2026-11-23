@@ -107,8 +107,8 @@ def test_short_interval_is_contaminated():
 def test_short_interval_is_judged_within_its_own_block():
     # Two blocks whose real factors differ about 2x: neighbors are only same-block intervals.
     ivs = _ivs([2.0, 2.1, 1.9, 0.8, 0.85, 0.75])
-    for i, iv in enumerate(ivs):
-        iv["block"] = "cr" if i < 3 else "out"
+    for i, row in enumerate(ivs):
+        row["block"] = "cr" if i < 3 else "out"
     assert [i["grade"] for i in guard.grade_intervals(ivs, [])] == ["clean"] * 6
     ivs[4]["prior_points"] = 0.2  # really short inside the low block
     out = guard.grade_intervals(ivs, [])
