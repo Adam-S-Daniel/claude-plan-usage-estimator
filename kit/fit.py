@@ -22,7 +22,7 @@ import numpy as np
 from scipy.optimize import linprog
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from kit import guard  # noqa: E402
+from kit import guard, intervals  # noqa: E402
 from usage_weights import TOKEN_TYPES, load_table, reading_bounds  # noqa: E402
 from usage_weights.records import resolve_model  # noqa: E402
 
@@ -160,6 +160,15 @@ def fit_run(run_dir, spec=None):
     calls = read_jsonl(os.path.join(run_dir, "calls.jsonl"))
     readings = read_jsonl(os.path.join(run_dir, "readings.jsonl"))
     prior = load_table(spec["prior"])
+    if g is not None:
+        # grade_intervals' short-interval evidence is never written to guard.json, so
+        # recompute it here: only clean (or corrected) intervals may feed the fit.
+        _, ivs = intervals.compute(calls, readings, prior)
+        dirty = [iv for iv in guard.grade_intervals(ivs, g.get("evidence", [])) if not guard.usable(iv)]
+        if dirty:
+            kinds = sorted({e["kind"] for iv in dirty for e in iv["evidence"] if not e.get("correction")})
+            raise ValueError(f"{len(dirty)} contaminated interval(s) (first at {dirty[0]['end']}; {', '.join(kinds)}); "
+                             f"a run with a contaminated interval is not fitted. Record a correction or trim the run")
     meters, free, names, cc = build_calls(calls, readings, spec, prior)
     tol, mode = spec["tolerance"], spec["charge"]
     cli = [(r["meter"], parse_iso(r["at"]), *reading_bounds(r["percent"], "cli"))

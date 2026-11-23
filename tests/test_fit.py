@@ -95,10 +95,10 @@ def _write(tmp_path, calls, readings):
     return str(tmp_path)
 
 
-def _synthetic(true_w, offset):
+def _synthetic(true_w, offset, even=False):
     calls, readings, total = [], [], 0.0
     for i in range(60):
-        out = 150_000 + 37_000 * (i % 7)
+        out = 200_000 if even else 150_000 + 37_000 * (i % 7)
         t0 = i * 60
         calls.append({"tag": "c", "model": FABLE, "started": _iso(t0), "ended": _iso(t0 + 30),
                       "tokens": {"input": 0, "output": out, "cache_read": 0, "cache_write_5m": 0, "cache_write_1h": 0},
@@ -122,6 +122,19 @@ def test_synthetic_truth_is_inside_fitted_ranges(tmp_path):
     lo, hi = res["range"]["offset.all_models"]
     assert lo <= offset <= hi
     assert hi - lo < 1.0
+
+
+def test_a_short_interval_run_with_a_guard_file_is_not_fitted(tmp_path):
+    calls, readings = _synthetic(3.1, 10.37, even=True)  # the same unit of work in every call
+    (tmp_path / "fit-spec.json").write_text(json.dumps(SPEC))
+    (tmp_path / "guard.json").write_text(json.dumps({"guard": {}, "evidence": []}))
+    run = _write(tmp_path, calls, readings)
+    assert fit.fit_run(run)["solves"]["none"]["feasible"]  # evenly sized work is clean
+    for c in calls[20:30]:  # a stretch that took far fewer kit tokens than its neighbors
+        c["tokens"]["output"] = 1000
+    _write(tmp_path, calls, readings)
+    with pytest.raises(ValueError, match="short_interval"):
+        fit.fit_run(run)
 
 
 def test_synthetic_contradiction_is_infeasible(tmp_path):
